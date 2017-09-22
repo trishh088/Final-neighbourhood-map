@@ -295,6 +295,10 @@ var ViewModel = function() {
     self.selectItem = function(listItem, marker) {
         // to get the infowindow to pop up when the item in the listview is clicked.
         google.maps.event.trigger(listItem.marker, 'click');
+        //to close the side bar on mobile devices when an item on list view is clikced
+        if (window.innerWidth >= 300 && window.innerWidth <=700 ) {
+        self.closeNav();
+      }
 
     };
 
