@@ -3,7 +3,7 @@ body {
     transition: background-color .5s;
     background-color: #1F2C40;
     color: #444;
-    
+
 }
 
 .sidenav {
@@ -42,6 +42,7 @@ body {
   margin-top: 0px;
   /*to keep the text aligned*/
   padding-left: 135px;
+  font-family: 'Pacifico', cursive;
 
 }
 
@@ -97,7 +98,7 @@ body {
   margin: 10px 0;
   text-align: auto;
   font-family: 'Pacifico', cursive;
-  color: #E6BE8A;
+  color: #ccac00;
 
 }
 

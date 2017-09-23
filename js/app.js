@@ -1,4 +1,8 @@
-'use strict';
+// to prevent jshint errors
+/*global ko*/
+/*global $*/
+/* jshint -W097 */
+"use strict";
 var styles = [{
     elementType: 'geometry',
     stylers: [{
@@ -107,7 +111,10 @@ var styles = [{
 }];
 
 var map;
+var google;
 var markers = [];
+var populateInfoWindow;
+var getStreetView;
 var locations = [{
     title: 'Park Ave Penthouse',
     location: {
@@ -138,6 +145,18 @@ var locations = [{
         lat: 40.7180628,
         lng: -73.9961237
     }
+}, {
+    title: 'The Spotted Pig',
+    location: {
+        lat: 40.7356067,
+        lng: -74.006671
+    }
+}, {
+    title: 'Meadowlands Sports Complex',
+    location: {
+        lat: 40.8116428,
+        lng: -74.067745
+    }
 }];
 
 function initMap() {
@@ -146,14 +165,14 @@ function initMap() {
             lat: 40.7413549,
             lng: -73.9980244
         },
-        zoom: 13,
+        zoom: 11,
         //for changing the look of the map
         styles: styles,
         //allows users to change the map type to road , terrian or satellite
         mapTypeControl: true
     });
     // to make the markers visible even if the viewport is reduced
-    google.maps.event.addDomListener(window, "resize", function() {
+    google.maps.event.addDomListener(window, "resize", function () {
         var center = map.getCenter();
         google.maps.event.trigger(map, "resize");
         map.setCenter(center);
@@ -177,9 +196,8 @@ function initMap() {
             icon: 'https://www.google.com/mapfiles/marker.png',
 
         });
-
         //To change the colour of the marker colouron interaction through listview or by manually clicking
-        google.maps.event.addListener(marker, 'click', function(marker, i) {
+        google.maps.event.addListener(marker, 'click', function (marker) {
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setIcon('https://www.google.com/mapfiles/marker.png'); // set back to default
             }
@@ -188,7 +206,7 @@ function initMap() {
 
         viewModel.locationArray()[i].marker = marker;
 
-        function populateInfoWindow(marker, infowindow, locationItem) {
+        populateInfoWindow = function (marker, infowindow, locationItem) {
 
             // Check to make sure the infowindow is not already opened on this marker.
             if (infowindow.marker != marker) {
@@ -196,7 +214,7 @@ function initMap() {
 
                 infowindow.marker = marker;
                 // Make sure the marker property is cleared if the infowindow is closed.
-                infowindow.addListener('closeclick', function() {
+                infowindow.addListener('closeclick', function () {
                     infowindow.marker = null;
                     //so that the colour of the marker is red again once the infowindow is closed.
                     marker.setIcon('https://www.google.com/mapfiles/marker.png');
@@ -210,7 +228,7 @@ function initMap() {
                 var articles;
                 var fullList = '<br/><strong>Related NY Times Articles:</strong><br/>';
                 var nytimeurl = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + marker.title + '&sort=newest&api-key=4c3e33c2b2534f8c958d1c1e6084f75e';
-                $.getJSON(nytimeurl, function(data) {
+                $.getJSON(nytimeurl, function (data) {
                         //used slice(0, 3) to get only 2 articles in the infowindow as it was looking overcrowded before
                         articles = data.response.docs.slice(0, 3);
                         for (var i = 0; i < articles.length; i++) {
@@ -226,18 +244,17 @@ function initMap() {
                         streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
                         // so that the marker keeps bouncing always
                         marker.setAnimation(google.maps.Animation.BOUNCE);
-                        // map.setZoom(15);
                         //pan down infowindow by 450px to keep whole infowindow on screen
                         map.panBy(0, -450);
                         //zooms to that location
-                        map.setZoom(12);
+                        map.setZoom(10);
 
                     })
-                    .error(function() {
+                    .error(function () {
                         alert("Something went wrong! NYT articles culd not be loaded");
                     });
 
-                function getStreetView(data, status) {
+                getStreetView = function (data, status) {
                     if (status == google.maps.StreetViewStatus.OK) {
                         var nearStreetViewLocation = data.location.latLng;
                         var heading = google.maps.geometry.spherical.computeHeading(
@@ -257,56 +274,58 @@ function initMap() {
                             '<div>No Street View Found</div>');
                     }
 
-                }
+                };
 
                 // Open the infowindow on the correct marker.
                 infowindow.open(map, marker);
             }
-        }
+
+        };
 
         // Push the marker to our array of markers.
         markers.push(marker);
         // Create an onclick event to open an infowindow at each marker.
-        marker.addListener('click', function() {
+        marker.addListener('click', function () {
             populateInfoWindow(this, largeInfowindow);
         });
         bounds.extend(markers[i].position);
-
-    };
-
+    }
 }
 
-function mapError() {
+var mapError = function () {
     alert("Map could not be loaded at this moment. Please try again");
-}
+};
 
-var ViewModel = function() {
+var ViewModel = function () {
     var self = this;
 
     // for the slide out menu
     self.navIsOpen = ko.observable(false);
-    self.closeNav = function() {
+    self.closeNav = function () {
         self.navIsOpen(false);
-    }
-    self.openNav = function() {
+    };
+    self.openNav = function () {
         self.navIsOpen(true);
-    }
+    };
 
-    self.selectItem = function(listItem, marker) {
+    self.selectItem = function (listItem, marker) {
         // to get the infowindow to pop up when the item in the listview is clicked.
         google.maps.event.trigger(listItem.marker, 'click');
+        listItem.marker.setAnimation(google.maps.Animation.BOUNCE);
         //to close the side bar on mobile devices when an item on list view is clikced
-        if (window.innerWidth >= 300 && window.innerWidth <=700 ) {
-        self.closeNav();
-      }
-
+        if (window.innerWidth >= 300 && window.innerWidth <= 700) {
+            self.closeNav();
+            map.setZoom(13);
+            listItem.marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
     };
 
     self.locationArray = ko.observableArray(locations);
 
     //for searching the locations
-    self.showAll = function(variable) {
-        for (var i = 0; i < self.locationArray().length; i++) {
+    self.showAll = function (variable) {
+        for (var i = 0; i < self.locationArray()
+            .length; i++) {
             if (self.locationArray()[i].marker)
                 self.locationArray()[i].marker.setVisible(variable);
         }
@@ -314,7 +333,7 @@ var ViewModel = function() {
 
     //for filtering the serach of the list view
     this.inputValue = ko.observable('');
-    this.filterLocations = ko.computed(function() {
+    this.filterLocations = ko.computed(function () {
         // for the search box
         var SearchValue = self.inputValue();
         if (SearchValue.length === 0) {
@@ -325,7 +344,8 @@ var ViewModel = function() {
         } else {
             // filter locations according to keywords typed
             var tempArray = [];
-            for (var i = 0; i < self.locationArray().length; i++) {
+            for (var i = 0; i < self.locationArray()
+                .length; i++) {
                 if (self.locationArray()[i].title.toLowerCase()
                     .indexOf(SearchValue.toLowerCase()) > -1) {
                     //pans to the marker according to the query typed in search
@@ -337,9 +357,9 @@ var ViewModel = function() {
                 }
             }
             return tempArray;
-          }
-        });
-      }
+        }
+    });
+};
 
 var viewModel = new ViewModel();
 
