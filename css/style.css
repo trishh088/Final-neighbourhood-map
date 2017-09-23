@@ -54,6 +54,9 @@ body {
   left:0.05cm;
   color: #9932CC;
   background-color: rgb(255, 255, 255);
+  font-size:20px;
+  cursor:pointer;
+  border-radius: 40px;
 
 }
 
@@ -83,8 +86,6 @@ body {
 
 }
 
-
-
 .item-list {
   border: 0px solid rgba(123, 123, 123, 0.498039);
   border-radius: 40px;
@@ -104,7 +105,7 @@ body {
 }
 
 .item-list:hover{
-  background: #6b1d4d;
+  background: #af3a82;
   cursor: pointer;
 
 }
