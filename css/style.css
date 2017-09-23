@@ -99,6 +99,13 @@ body {
   text-align: auto;
   font-family: 'Pacifico', cursive;
   color: #ccac00;
+  cursor: pointer;
+
+}
+
+.item-list:hover{
+  background: #6b1d4d;
+  cursor: pointer;
 
 }
 
