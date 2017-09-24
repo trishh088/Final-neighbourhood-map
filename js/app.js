@@ -113,6 +113,7 @@ var styles = [{
 var map;
 var google;
 var markers = [];
+var infowindow;
 var populateInfoWindow;
 var getStreetView;
 var locations = [{
@@ -179,7 +180,7 @@ function initMap() {
     });
 
     var bounds = new google.maps.LatLngBounds();
-    var largeInfowindow = new google.maps.InfoWindow({
+    infowindow = new google.maps.InfoWindow({
         maxWidth: 200
     });
 
@@ -194,103 +195,104 @@ function initMap() {
             title: title,
             animation: google.maps.Animation.BOUNCE,
             icon: 'https://www.google.com/mapfiles/marker.png',
-
-        });
-        //To change the colour of the marker colouron interaction through listview or by manually clicking
-        google.maps.event.addListener(marker, 'click', function (marker) {
-            for (var i = 0; i < markers.length; i++) {
-                markers[i].setIcon('https://www.google.com/mapfiles/marker.png'); // set back to default
-            }
-            this.setIcon('https://www.google.com/mapfiles/marker_green.png');
         });
 
         viewModel.locationArray()[i].marker = marker;
 
-        populateInfoWindow = function (marker, infowindow, locationItem) {
-
-            // Check to make sure the infowindow is not already opened on this marker.
-            if (infowindow.marker != marker) {
-                infowindow.setContent('');
-
-                infowindow.marker = marker;
-                // Make sure the marker property is cleared if the infowindow is closed.
-                infowindow.addListener('closeclick', function () {
-                    infowindow.marker = null;
-                    //so that the colour of the marker is red again once the infowindow is closed.
-                    marker.setIcon('https://www.google.com/mapfiles/marker.png');
-                    // to make the map appear like it did when the page loaded initmap is induced (for keeping the same center as mapzoom changes the view and all markers dont seem visible after the infowindow is opened)
-                    initMap();
-                });
-                var streetViewService = new google.maps.StreetViewService();
-                var radius = 50;
-
-                var list;
-                var articles;
-                var fullList = '<br/><strong>Related NY Times Articles:</strong><br/>';
-                var nytimeurl = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + marker.title + '&sort=newest&api-key=4c3e33c2b2534f8c958d1c1e6084f75e';
-                $.getJSON(nytimeurl, function (data) {
-                        //used slice(0, 3) to get only 2 articles in the infowindow as it was looking overcrowded before
-                        articles = data.response.docs.slice(0, 3);
-                        for (var i = 0; i < articles.length; i++) {
-                            var article = articles[i];
-                            list = '👉🏻' + '<a href="' + article.web_url + '"">' + article.headline.main + '</a><br/>';
-                            fullList = fullList + list;
-                        }
-                        // called here so that both streetview and nyt api are in the same infowindow instead of calling it before   var panoramaOptions
-                        infowindow.setContent('<div' + '""' + '</div>' + '<strong>' + marker.title + '</strong>' + '<div><div id="pano"></div>' + '<div>' + fullList + '</div>');
-                        // Use streetview service to get the closest streetview image within
-                        // 50 meters of the markers position
-                        //Also called here so that both infowindow and nyt api can be in the same infowindow instead of before infowindow.open(map, marker);
-                        streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
-                        // so that the marker keeps bouncing always
-                        marker.setAnimation(google.maps.Animation.BOUNCE);
-                        //pan down infowindow by 450px to keep whole infowindow on screen
-                        map.panBy(0, -450);
-                        //zooms to that location
-                        map.setZoom(10);
-
-                    })
-                    .error(function () {
-                        alert("Something went wrong! NYT articles culd not be loaded");
-                    });
-
-                getStreetView = function (data, status) {
-                    if (status == google.maps.StreetViewStatus.OK) {
-                        var nearStreetViewLocation = data.location.latLng;
-                        var heading = google.maps.geometry.spherical.computeHeading(
-                            nearStreetViewLocation, marker.position);
-                        var panoramaOptions = {
-                            position: nearStreetViewLocation,
-                            pov: {
-                                heading: heading,
-                                pitch: 30
-                            }
-                        };
-
-                        var panorama = new google.maps.StreetViewPanorama(
-                            document.getElementById('pano'), panoramaOptions);
-                    } else {
-                        infowindow.setContent('<div>' + marker.title + '</div>' +
-                            '<div>No Street View Found</div>');
-                    }
-
-                };
-
-                // Open the infowindow on the correct marker.
-                infowindow.open(map, marker);
-            }
-
-        };
 
         // Push the marker to our array of markers.
         markers.push(marker);
         // Create an onclick event to open an infowindow at each marker.
-        marker.addListener('click', function () {
-            populateInfoWindow(this, largeInfowindow);
-        });
+        marker.addListener('click', populateInfoWindow);
+
         bounds.extend(markers[i].position);
     }
 }
+
+populateInfoWindow = function () {
+  var marker = this;
+
+  for (var i = 0; i < markers.length; i++) {
+      markers[i].setIcon('https://www.google.com/mapfiles/marker.png'); // set back to default
+  }
+  this.setIcon('https://www.google.com/mapfiles/marker_green.png');
+
+
+    // Check to make sure the infowindow is not already opened on this marker.
+    if (infowindow.marker != marker) {
+        infowindow.setContent('');
+
+        infowindow.marker = marker;
+        // Make sure the marker property is cleared if the infowindow is closed.
+        infowindow.addListener('closeclick', function () {
+            infowindow.marker = null;
+            //so that the colour of the marker is red again once the infowindow is closed.
+            marker.setIcon('https://www.google.com/mapfiles/marker.png');
+            // to make the map appear like it did when the page loaded initmap is induced (for keeping the same center as mapzoom changes the view and all markers dont seem visible after the infowindow is opened)
+            initMap();
+        });
+        var streetViewService = new google.maps.StreetViewService();
+        var radius = 50;
+
+        var list;
+        var articles;
+        var fullList = '<br/><strong>Related NY Times Articles:</strong><br/>';
+        var nytimeurl = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + marker.title + '&sort=newest&api-key=4c3e33c2b2534f8c958d1c1e6084f75e';
+        $.getJSON(nytimeurl, function (data) {
+                //used slice(0, 3) to get only 2 articles in the infowindow as it was looking overcrowded before
+                articles = data.response.docs.slice(0, 3);
+                for (var i = 0; i < articles.length; i++) {
+                    var article = articles[i];
+                    list = '👉🏻' + '<a href="' + article.web_url + '"">' + article.headline.main + '</a><br/>';
+                    fullList = fullList + list;
+                }
+                // called here so that both streetview and nyt api are in the same infowindow instead of calling it before   var panoramaOptions
+                infowindow.setContent('<div' + '""' + '</div>' + '<strong>' + marker.title + '</strong>' + '<div><div id="pano"></div>' + '<div>' + fullList + '</div>');
+                // Use streetview service to get the closest streetview image within
+                // 50 meters of the markers position
+                //Also called here so that both infowindow and nyt api can be in the same infowindow instead of before infowindow.open(map, marker);
+                streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+                // so that the marker keeps bouncing always
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+                //pan down infowindow by 450px to keep whole infowindow on screen
+                map.panBy(5, 5);
+                //zooms to that location
+                map.setZoom(13);
+                // Open the infowindow on the correct marker.
+                infowindow.open(map, marker);
+
+            })
+            .error(function () {
+                alert("Something went wrong! NYT articles culd not be loaded");
+            });
+
+        getStreetView = function (data, status) {
+            if (status == google.maps.StreetViewStatus.OK) {
+                var nearStreetViewLocation = data.location.latLng;
+                var heading = google.maps.geometry.spherical.computeHeading(
+                    nearStreetViewLocation, marker.position);
+                var panoramaOptions = {
+                    position: nearStreetViewLocation,
+                    pov: {
+                        heading: heading,
+                        pitch: 30
+                    }
+                };
+
+                var panorama = new google.maps.StreetViewPanorama(
+                    document.getElementById('pano'), panoramaOptions);
+            } else {
+                infowindow.setContent('<div>' + marker.title + '</div>' +
+                    '<div>No Street View Found</div>');
+            }
+
+        };
+
+
+    }
+
+};
+
 
 var mapError = function () {
     alert("Map could not be loaded at this moment. Please try again");
