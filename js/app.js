@@ -262,7 +262,7 @@ populateInfoWindow = function () {
                 infowindow.open(map, marker);
 
             })
-            .error(function () {
+            .fail(function () {
                 alert("Something went wrong! NYT articles culd not be loaded");
             });
 

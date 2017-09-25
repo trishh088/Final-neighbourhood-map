@@ -12,6 +12,7 @@
       <link rel="stylesheet" href="css/bootstrap.min.css">
    </head>
    <body>
+     <aside>
       <div id="mySidenav" class="sidenav" data-bind="style:{width:navIsOpen()?'220px':'0'}">
          <a data-bind="click:closeNav" class="closebtn" style="cursor:pointer">&times;</a>
          <div id="inputSection">
@@ -25,10 +26,15 @@
             </span>
          </div>
       </div>
+    </aside>
+    <main>
       <div id="main" data-bind="style:{marginLeft:navIsOpen()?'220px':'0px'}">
+        <header>
          <h3 id="titletext"><button class="toggle-button" data-bind="click:openNav">&#9776;Push Me ✋</button>🗺🌎Neighbourhood Map Project🌎🗺</h3>
+       </header>
       </div>
       <div id="map" data-bind="style:{marginLeft:navIsOpen()?'220px':'0px'}">></div>
+    </main>
       <script src="js/lib/knockout-3.2.0.js"></script>
       <script src="js/lib/jquery.min.js"></script>
       <script src="js/app.js"></script>

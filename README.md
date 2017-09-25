@@ -7,7 +7,7 @@
 * You can also see the contents of the info-window by clicking on the 'Push Me ✋' button and clicking on the options in the list-view .
 * Another way is to use the search bar you see after clicking the 'Push Me ✋' button.
 * The map sets to its original position after an info-window is closed for making it more user friendly.  
-* For Mobile Users- Close the side bar when you click on the item on the list to get a better view of the info-window 
+* For Mobile Users- Close the side bar when you click on the item on the list to get a better view of the info-window
 **Enjoy the Neighbourhood💁**
 
 
@@ -15,6 +15,9 @@
 
 https://trishh088.github.io/Final-neighbourhood-map/
 
-## To download the project click the link below
+## Steps to open and run the app
 
-https://github.com/trishh088/Final-neighbourhood-map
+* Go to the link https://github.com/trishh088/Final-neighbourhood-map
+* Click on Clone/Download and Choose Open in Desktop/Download Zip which ever is convenient.
+* Open the index.html file to run the app on your local PC.
+* The css file is for styling the page and app.js is the javascript file located in the lib folder.   
